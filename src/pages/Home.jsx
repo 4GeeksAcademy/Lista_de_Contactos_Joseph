@@ -1,16 +1,40 @@
-import rigoImageUrl from "../assets/img/rigo-baby.jpg";
-import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import { useEffect, useState } from "react";
+import ContactCard from "../components/ContactCard";
 
-export const Home = () => {
+const AGENDA = "joseph";
 
-  const {store, dispatch} =useGlobalReducer()
+export default function Home() {
+  const [contacts, setContacts] = useState([]);
 
-	return (
-		<div className="text-center mt-5">
-			<h1>Hello Rigo!!</h1>
-			<p>
-				<img src={rigoImageUrl} />
-			</p>
-		</div>
-	);
-}; 
+  const loadContacts = async () => {
+    const resp = await fetch(
+      `https://playground.4geeks.com/contact/agendas/${AGENDA}/contacts`
+    );
+    const data = await resp.json();
+    setContacts(data.contacts || []);
+  };
+
+  const deleteContact = async (id) => {
+    await fetch(
+      `https://playground.4geeks.com/contact/agendas/${AGENDA}/contacts/${id}`,
+      { method: "DELETE" }
+    );
+    loadContacts();
+  };
+
+  useEffect(() => {
+    loadContacts();
+  }, []);
+
+  return (
+    <div className="container mt-4">
+      {contacts.map(contact => (
+        <ContactCard
+          key={contact.id}
+          contact={contact}
+          onDelete={deleteContact}
+        />
+      ))}
+    </div>
+  );
+}
